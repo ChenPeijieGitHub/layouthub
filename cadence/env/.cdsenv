@@ -1,0 +1,5 @@
+; mpt setting
+mpt coloringEngineEnabled boolean t
+mpt unclusteredShapeColor "auto"
+
+
