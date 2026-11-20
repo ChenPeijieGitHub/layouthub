@@ -1,4 +1,0 @@
-; 启动MPT动态着色引擎
-mptActivate(t)
-; 可选：锁定默认颜色不被自动重分配
-mptSetLockDefaultColors(t)
