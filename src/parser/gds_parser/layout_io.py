@@ -1,6 +1,7 @@
 # lib/parser/gds_parser/layout_io.py
+import fnmatch
 from pathlib import Path
-from typing import List, Optional, Generator, Literal
+from typing import Dict, List, Optional, Generator, Literal, Set
 import gdstk
 
 from parser.base_parser import BaseParser
@@ -82,6 +83,85 @@ class LayoutIo(BaseParser):
             raise LayoutIoError("Library not parsed")
         self.lib.add(cell)
         logger.debug(f"Add cell: {cell.name}")
+        
+    def _match_cells_by_wildcard(self, match_list: List[str]) -> Set[gdstk.Cell]:
+        """根据通配符列表匹配cell."""
+        targets = set()
+        for cell in self.lib.cells:
+            if any(fnmatch.fnmatch(cell.name, p) for p in match_list):
+                targets.add(cell)
+        return targets
+
+    def _build_ref_graph(self) -> tuple[Dict[gdstk.Cell, List[gdstk.Cell]], Dict[gdstk.Cell, List[gdstk.Cell]]]:
+        """构建正向,反向引用关系图."""
+        forward = {c: [] for c in self.lib.cells}
+        reverse = {c: [] for c in self.lib.cells}
+        for parent in self.lib.cells:
+            for ref in parent.references:
+                child = ref.cell
+                forward[parent].append(child)
+                reverse[child].append(parent)
+        return forward, reverse
+
+    def _bfs_collect_subtree(self, roots: List[gdstk.Cell], forward: Dict[gdstk.Cell, List[gdstk.Cell]]) -> Set[gdstk.Cell]:
+        """通过BFS收集根节点下整棵子树的所有cell."""
+        subtree, stack = set(), list(roots)
+        while stack:
+            cell = stack.pop()
+            if cell in subtree:
+                continue
+            subtree.add(cell)
+            stack.extend(forward[cell])
+        return subtree
+
+    def _clean_subtree_refs(self, root: gdstk.Cell, forward: Dict[gdstk.Cell, List[gdstk.Cell]], ref_cnt: Dict[gdstk.Cell, int]):
+        """后序迭代遍历,清理子树内部所有引用."""
+        visited, stk = set(), [(root, False)]
+        while stk:
+            node, done = stk.pop()
+            if done:
+                for ref in list(node.references):
+                    ch = ref.cell
+                    node.remove(ref)
+                    ref_cnt[ch] -= 1
+                continue
+            if node in visited:
+                continue
+            visited.add(node)
+            stk.append((node, True))
+            for ch in reversed(forward[node]):
+                stk.append((ch, False))
+
+    def remove_cells_by_match_list(self, match_list: List[str], dry_run: bool = False) -> None:
+        """
+        删除匹配到的cell及其子cell.
+        如果子cell存在外部引用,仅删除引用关系;否则直接删除cell.
+        :param match_list: 通配符pattern列表,支持*,?
+        :param dry_run: 是否试运行,True时只打印日志,不修改库
+        """
+        if self.lib is None:
+            raise LayoutIoError("Call parse() first")
+        targets = self._match_cells_by_wildcard(match_list)
+        if not targets:
+            logger.info(f"No cell matched by {match_list}")
+            return
+        logger.info(f"Matched {len(targets)} target cells")
+
+        forward, reverse = self._build_ref_graph()
+        ref_cnt = {c: len(v) for c, v in reverse.items()}
+        subtree = self._bfs_collect_subtree(list(targets), forward)
+        logger.info(f"Subtree total {len(subtree)} cells")
+
+        if dry_run:
+            logger.info("Dry run, skip delete")
+            return
+        for root in targets:
+            self._clean_subtree_refs(root, forward, ref_cnt)
+        del_cells = [c for c in self.lib.cells if ref_cnt[c] == 0]
+        for c in del_cells:
+            self.lib.remove(c)
+        logger.info(f"Removed {len(del_cells)} cells from library")
+
 
     def save(self) -> None:
         """原地保存,按原文件后缀自动选择gds/oas格式"""
