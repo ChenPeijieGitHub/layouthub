@@ -1,0 +1,30 @@
+{
+  "testkey_pattern": "^TL_",
+  "coordinate_unit": "um",
+  "pin_layers": [
+    {
+      "layer": 10,
+      "texttype": 0
+    }
+  ],
+  "pin_order_rules": [
+    {
+      "cell_pattern": "^RES_",
+      "pins": [
+        "PLUS",
+        "MINUS"
+      ]
+    }
+  ],
+  "device_rules": [
+    {
+      "cell_pattern": "^RES_",
+      "device_type": "resistor",
+      "extractor": "bbox",
+      "options": {
+        "layer": 1,
+        "datatype": 0
+      }
+    }
+  ]
+}
