@@ -107,11 +107,7 @@ class LayoutIo(BaseParser):
 
         # 将子串转义后合并成正则，按字面内容匹配 cell 名称。
         pattern = "|".join(re.escape(item) for item in match_list)
-        targets = {
-            cell
-            for cell in self.lib.cells
-            if re.search(pattern, cell.name)
-        }
+        targets = {cell for cell in self.lib.cells if re.search(pattern, cell.name)}
         if not targets:
             logger.info(f"No cell matched by {match_list}")
             return
@@ -132,27 +128,14 @@ class LayoutIo(BaseParser):
             logger.info("Dry run, skip delete")
             return
 
-        # 删除全库中指向待删除 cell 的引用，避免保留悬空层级关系。
-        references_removed = 0
-        for cell in self.lib.cells:
-            references = [
-                reference
-                for reference in cell.references
-                if reference.cell in delete_cells
-            ]
-            if references:
-                cell.remove(*references)
-                references_removed += len(references)
-
-        # 引用清理后，再从 library 中移除匹配 cell 及其所有子 cell。
-        cells_to_remove = [
-            cell for cell in self.lib.cells if cell in delete_cells
-        ]
-        self.lib.remove(*cells_to_remove)
-        logger.info(
-            f"Removed {len(cells_to_remove)} cells and "
-            f"{references_removed} references from library"
-        )
+        # 清理引用
+        left_cells = set(self.lib.cells) - delete_cells
+        for cell in left_cells:
+            refs_to_remove = [ref for ref in cell.references if ref.cell in delete_cells]
+            cell.remove(*refs_to_remove)
+        # 引用清理后，再从 library 中移除匹配 cell 及其所有子 cell
+        self.lib.remove(*delete_cells)
+        logger.info(f"Removed {len(delete_cells)} cells")
 
     def save(self) -> None:
         """原地保存,按原文件后缀自动选择gds/oas格式"""
