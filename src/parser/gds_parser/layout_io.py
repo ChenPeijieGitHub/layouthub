@@ -1,7 +1,7 @@
 # lib/parser/gds_parser/layout_io.py
 from pathlib import Path
 import re
-from typing import List, Optional, Generator, Literal
+from typing import List, Optional, Generator, Literal, Union
 import gdstk
 
 from parser.base_parser import BaseParser
@@ -19,7 +19,7 @@ class LayoutIo(BaseParser):
     能力:读取、查找cell、遍历、修改图形、新增cell、写出gds/oas
     上层拿到的cell对象统一
     """
-    def __init__(self, file_path: str | Path):
+    def __init__(self, file_path: Union[str, Path]):
         super().__init__(file_path)
         self.lib: Optional[gdstk.Library] = None
         self._format: Optional[Literal["gds", "oas"]] = None
@@ -147,7 +147,7 @@ class LayoutIo(BaseParser):
         elif self.format == "oas":
             self.lib.write_oas(str(self.file_path))
 
-    def save_as(self, out_path: str | Path) -> None:
+    def save_as(self, out_path: Union[str, Path]) -> None:
         """另存为,自动根据输出文件名后缀选格式"""
         out_path = Path(out_path)
         if self.lib is None:

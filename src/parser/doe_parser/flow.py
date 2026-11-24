@@ -1,6 +1,6 @@
 import csv
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from generator.cdl_generator import CdlGenerator
 from parser.gds_parser import LayoutIo
@@ -20,11 +20,11 @@ _BASE_DOE_COLUMNS = [
 class LayoutDoeFlow:
     """解析 GDS 中的 testkey/DUT，并输出 DOE CSV 与 CDL 接口骨架。"""
 
-    def __init__(self, gds_path: str | Path, config_path: str | Path):
+    def __init__(self, gds_path: Union[str, Path], config_path: Union[str, Path]):
         self.gds_path = Path(gds_path)
         self.config = DoeCdlConfig.from_file(config_path)
 
-    def run(self, output_dir: str | Path) -> Tuple[Path, Path]:
+    def run(self, output_dir: Union[str, Path]) -> Tuple[Path, Path]:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         doe_path = output_dir / "doe.csv"

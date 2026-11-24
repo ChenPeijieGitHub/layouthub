@@ -2,7 +2,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Mapping, Tuple
+from typing import Any, List, Mapping, Tuple, Union
 
 from .exceptions import DoeParseError
 
@@ -30,7 +30,7 @@ class DoeCdlConfig:
     device_rules: Tuple[DeviceRule, ...]
 
     @classmethod
-    def from_file(cls, path: str | Path) -> "DoeCdlConfig":
+    def from_file(cls, path: Union[str, Path]) -> "DoeCdlConfig":
         config_path = Path(path)
         try:
             with config_path.open(encoding="utf-8") as config_file:

@@ -1,6 +1,6 @@
 from pathlib import Path
 import re
-from typing import Iterable, List, Sequence, Set, Tuple
+from typing import Iterable, List, Sequence, Set, Tuple, Union
 
 import gdstk
 
@@ -26,7 +26,7 @@ class CdlGenerator:
             for pattern, pins in pin_order_rules
         ]
 
-    def write(self, roots: Iterable[gdstk.Cell], output_path: str | Path) -> Path:
+    def write(self, roots: Iterable[gdstk.Cell], output_path: Union[str, Path]) -> Path:
         output_path = Path(output_path)
         cells = self._hierarchy_cells(roots)
         interfaces = [

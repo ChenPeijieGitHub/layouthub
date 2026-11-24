@@ -2,12 +2,12 @@
 import logging
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 
 def get_logger(
     name: str,
-    log_dir: Optional[str | Path] = None,
+    log_dir: Optional[Union[str, Path]] = None,
     log_level: str = "INFO",
     console: bool = True,
     file: bool = True

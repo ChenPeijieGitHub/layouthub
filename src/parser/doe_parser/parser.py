@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any, Dict, Iterable, List, Sequence, Union
 
 import gdstk
 
@@ -76,7 +76,7 @@ class DoeParser:
             stack.extend(reference.cell for reference in reversed(cell.references))
         return cells
 
-    def _rule_for_cell(self, cell: gdstk.Cell) -> DeviceRule | None:
+    def _rule_for_cell(self, cell: gdstk.Cell) -> Union[DeviceRule, None]:
         matches = [
             rule
             for rule, pattern in self._rule_regexes
