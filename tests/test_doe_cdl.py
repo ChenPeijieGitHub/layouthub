@@ -6,7 +6,7 @@ from pathlib import Path
 
 import gdstk
 
-from generator.cdl_generator import CdlGenerator
+from generator.netlist import CdlGenerator
 from parser.doe_parser import DoeParseError, LayoutDoeFlow, register_parameter_extractor
 from parser.doe_parser.config import DeviceRule, DoeCdlConfig
 from parser.doe_parser.parser import DoeParser

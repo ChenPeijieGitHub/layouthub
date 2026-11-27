@@ -1,12 +1,12 @@
 # lib/parser/gds_parser/layout_io.py
 from pathlib import Path
 import re
-from typing import List, Optional, Generator, Literal, Union
+from typing import List, Optional, Generator, Literal, Set, Tuple, Union
 import gdstk
 
-from parser.base_parser import BaseParser
-from parser.gds_parser.exceptions import LayoutIoError
-from common.logger import get_logger
+from layouthub.src.parser.base_parser import BaseParser
+from layouthub.src.parser.doe_parser.exceptions import LayoutIoError
+from layouthub.src.common.logger import get_logger
 
 logger = get_logger(__name__)
 DMY_MATCH_LIST = ["FDY_", "BDY_", "FEOL_", "BEOL_"]
@@ -136,6 +136,9 @@ class LayoutIo(BaseParser):
         # 引用清理后，再从 library 中移除匹配 cell 及其所有子 cell
         self.lib.remove(*delete_cells)
         logger.info(f"Removed {len(delete_cells)} cells")
+
+    def get_cell_pins(self, cell: gdstk.Cell, pin_layers: Set[Tuple[int, int]]) -> List[str]:
+        return [label.text for label in cell.labels if (label.layer, label.texttype) in pin_layers]
 
     def save(self) -> None:
         """原地保存,按原文件后缀自动选择gds/oas格式"""

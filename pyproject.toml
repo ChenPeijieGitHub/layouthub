@@ -5,15 +5,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "layouthub"
 version = "0.1.0"
-dependencies = ["gdstk"]
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = [
-    "parser",
-    "parser.gds_parser",
-    "parser.doe_parser",
-    "common",
-    "generator",
-    "generator.cdl_generator",
-]
+[tool.setuptools.packages.find]
+where = ["src"]
