@@ -2,10 +2,10 @@ from pathlib import Path
 from typing import Union
 
 from .base_parser import BaseParser
-from common import Layer, get_logger
+from layouthub.common import Layer, get_logger
 
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 class LayerMapParser(BaseParser):
     def __init__(self, file_path: Union[str, Path]):

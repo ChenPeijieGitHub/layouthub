@@ -4,7 +4,7 @@ from pathlib import Path
 
 import gdstk
 
-from parser.gds_parser import LayoutIo
+from layouthub.parser.gds_parser import LayoutIo
 
 
 class RemoveDummyCellsTests(unittest.TestCase):
